@@ -1023,12 +1023,14 @@ WHERE `schema` IN (
                 aws_access_key_id=auth["ACCESS_KEY"],
                 aws_secret_access_key=auth["SECRET_KEY"],
                 region_name=region,
+                endpoint_url=auth.get("ENDPOINT_URL"),  # @dokos
             )
         else:
             s3 = boto3.client(
                 "s3",
                 aws_access_key_id=auth["ACCESS_KEY"],
                 aws_secret_access_key=auth["SECRET_KEY"],
+                endpoint_url=auth.get("ENDPOINT_URL"),  # @dokos
             )
 
         tmp_folder = get_tmp_folder_path()
@@ -1159,12 +1161,14 @@ WHERE `schema` IN (
                 aws_access_key_id=auth["ACCESS_KEY"],
                 aws_secret_access_key=auth["SECRET_KEY"],
                 region_name=region,
+                endpoint_url=auth.get("ENDPOINT_URL"),  # @dokos
             )
         else:
             s3 = boto3.client(
                 "s3",
                 aws_access_key_id=auth["ACCESS_KEY"],
                 aws_secret_access_key=auth["SECRET_KEY"],
+                endpoint_url=auth.get("ENDPOINT_URL"),  # @dokos
             )
 
         tmp_folder = get_tmp_folder_path()
