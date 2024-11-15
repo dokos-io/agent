@@ -1,9 +1,9 @@
 <!doctype html>
-<html lang="en">
+<html lang="fr">
   <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1" />
-    <title>Internal Server Error</title>
+    <title>Dokos Cloud</title>
     <style>
       *,
       *::before,
@@ -91,6 +91,19 @@
       .button:hover {
         background-color: #2f2f2f;
       }
+
+      .en {
+        font-size: 13px;
+        color: #7c7c7c;
+      }
+
+      .credit {
+        position: fixed;
+        bottom: 16px;
+        right: 16px;
+        font-size: 12px;
+        color: #7c7c7c;
+      }
     </style>
   </head>
   <body>
@@ -118,8 +131,9 @@
         <circle cx="20" cy="27.5" r="1.75" fill="#E5484D" />
       </svg>
       <div class="text">
-        <h1>The application returned an error</h1>
-        <p>Error: 500 Internal Server Error</p>
+        <h1>L'application a renvoyé une erreur</h1>
+        <p>Erreur : 500 Internal Server Error</p>
+        <p class="en" lang="en">The application returned an error. Error: 500 Internal Server Error</p>
       </div>
       <!-- nginx serves this page inside an iframe. A link with no target loads
            into that frame, and both destinations send X-Frame-Options:
@@ -129,17 +143,19 @@
         class="button"
         target="_blank"
         href="https://docs.frappe.io/cloud/site/common-issues/500-internal-server-error"
-        >View troubleshooting guide</a
+        >Voir le guide de dépannage (en anglais)</a
       >
     </div>
     <p class="footer">
-      Site owner? Review the
+      Propriétaire du site ? Consultez les
       <a
         target="_blank"
-        href="https://frappecloud.com/dashboard/benches/__BENCH_NAME__/logs/web.error.log"
-        >error logs</a
+        href="https://cloud.dokos.io/dashboard/benches/__BENCH_NAME__/logs/web.error.log"
+        >journaux d'erreurs</a
       >
-      to identify the cause.
+      pour en identifier la cause.
+      <br /><span class="en" lang="en">Site owner? Review the <a target="_blank" href="https://cloud.dokos.io/dashboard/benches/__BENCH_NAME__/logs/web.error.log">error logs</a> to identify the cause.</span>
     </p>
+    <p class="credit">Hébergé par Dokos SAS. Propulsé par le logiciel Frappe Press.</p>
   </body>
 </html>

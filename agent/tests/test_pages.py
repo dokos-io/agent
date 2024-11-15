@@ -65,3 +65,32 @@ class TestPages(unittest.TestCase):
             page_locations = template.count(f"location = /{name} {{")
             self.assertTrue(page_locations, f"{name} is not served by the bench nginx config")
             self.assertEqual(template.count(substituted), page_locations, name)
+
+
+# @dokos
+class TestDokosPages(unittest.TestCase):
+    """Dokos Cloud serves every page in French first, with the English text below."""
+
+    def test_every_page_is_translated(self):
+        for name, html in read_pages():
+            with self.subTest(page=name):
+                self.assertIn('<html lang="fr">', html)
+                self.assertIn('class="en" lang="en"', html)
+                self.assertIn("Hébergé par Dokos SAS", html)
+
+    def test_no_page_links_to_frappe_cloud(self):
+        for name, html in read_pages():
+            with self.subTest(page=name):
+                self.assertNotIn("frappecloud.com", html)
+
+    def test_gateway_and_server_errors_are_translated(self):
+        expected = {
+            "bad_gateway.html": "Ce site ne répond pas",
+            "gateway_timeout.html": "Ce site a mis trop de temps à répondre",
+            "internal_server_error.html": "L'application a renvoyé une erreur",
+        }
+        pages = dict(read_pages())
+        for name, title in expected.items():
+            with self.subTest(page=name):
+                self.assertIn(f"<h1>{title}</h1>", pages[name])
+                self.assertIn("<title>Dokos Cloud</title>", pages[name])

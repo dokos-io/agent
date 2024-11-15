@@ -1,9 +1,9 @@
 <!doctype html>
-<html lang="en">
+<html lang="fr">
   <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1" />
-    <title>Bad Gateway</title>
+    <title>Dokos Cloud</title>
     <style>
       *,
       *::before,
@@ -91,6 +91,19 @@
       .button:hover {
         background-color: #2f2f2f;
       }
+
+      .en {
+        font-size: 13px;
+        color: #7c7c7c;
+      }
+
+      .credit {
+        position: fixed;
+        bottom: 16px;
+        right: 16px;
+        font-size: 12px;
+        color: #7c7c7c;
+      }
     </style>
   </head>
   <body>
@@ -118,26 +131,21 @@
         <circle cx="20" cy="27.5" r="1.75" fill="#E5484D" />
       </svg>
       <div class="text">
-        <h1>This site is not responding</h1>
-        <p>Error: 502 Bad Gateway</p>
+        <h1>Ce site ne répond pas</h1>
+        <p>Erreur : 502 Bad Gateway</p>
+        <p class="en" lang="en">This site is not responding. Error: 502 Bad Gateway</p>
       </div>
       <a
         class="button"
         href="https://docs.frappe.io/cloud/site/common-issues/502-bad-gateway"
-        >View troubleshooting guide</a
+        >Voir le guide de dépannage (en anglais)</a
       >
     </div>
     <p class="footer">
-      Site owner? Check the
-      <a class="dashboard-url" href="https://frappecloud.com/dashboard"
-        >dashboard</a
-      >
-      for the current status of your bench.
+      Propriétaire du site ? Consultez l'état de votre bench depuis votre
+      <a href="https://cloud.dokos.io">compte Dokos Cloud</a>.
+      <br /><span class="en" lang="en">Site owner? Check the current status of your bench from your <a href="https://cloud.dokos.io">Dokos Cloud dashboard</a>.</span>
     </p>
-    <script>
-      // the dashboard link needs the site name, which only the browser knows here
-      document.querySelector(".dashboard-url").href =
-        `https://frappecloud.com/dashboard/sites/${window.location.hostname}`;
-    </script>
+    <p class="credit">Hébergé par Dokos SAS. Propulsé par le logiciel Frappe Press.</p>
   </body>
 </html>

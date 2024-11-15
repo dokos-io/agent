@@ -1,9 +1,9 @@
 <!doctype html>
-<html lang="en">
+<html lang="fr">
   <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1" />
-    <title>Daily Usage Limit Reached</title>
+    <title>Dokos Cloud</title>
     <style>
       *,
       *::before,
@@ -91,6 +91,19 @@
       .button:hover {
         background-color: #2f2f2f;
       }
+
+      .en {
+        font-size: 13px;
+        color: #7c7c7c;
+      }
+
+      .credit {
+        position: fixed;
+        bottom: 16px;
+        right: 16px;
+        font-size: 12px;
+        color: #7c7c7c;
+      }
     </style>
   </head>
   <body>
@@ -113,22 +126,16 @@
         <circle cx="20" cy="26.5" r="1.75" fill="#E79913" />
       </svg>
       <div class="text">
-        <h1>Daily usage limit reached</h1>
-        <p>
-          This site has used up the compute time included in its plan for today.
-        </p>
+        <h1>Quota d'utilisation dépassé</h1>
+        <p>Ce site a consommé tout le temps de calcul inclus dans son offre pour aujourd'hui.</p>
+        <p class="en" lang="en">Daily usage limit reached. This site has used up the compute time included in its plan for today.</p>
       </div>
     </div>
     <p class="footer">
-      Site owner? Upgrade your plan from the
-      <a class="dashboard-url" href="https://frappecloud.com/dashboard"
-        >dashboard</a
-      >.
+      Propriétaire du site ? Passez à une offre supérieure depuis votre
+      <a href="https://cloud.dokos.io">compte Dokos Cloud</a>.
+      <br /><span class="en" lang="en">Site owner? Upgrade your plan from your <a href="https://cloud.dokos.io">Dokos Cloud dashboard</a>.</span>
     </p>
-    <script>
-      // the dashboard link needs the site name, which only the browser knows here
-      document.querySelector(".dashboard-url").href =
-        `https://frappecloud.com/dashboard/sites/${window.location.hostname}`;
-    </script>
+    <p class="credit">Hébergé par Dokos SAS. Propulsé par le logiciel Frappe Press.</p>
   </body>
 </html>
