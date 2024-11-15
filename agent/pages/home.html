@@ -1,9 +1,9 @@
 <!doctype html>
-<html lang="en">
+<html lang="fr">
   <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1" />
-    <title>Frappe Cloud</title>
+    <title>Dokos Cloud</title>
     <style>
       *,
       *::before,
@@ -91,6 +91,19 @@
       .button:hover {
         background-color: #2f2f2f;
       }
+
+      .en {
+        font-size: 13px;
+        color: #7c7c7c;
+      }
+
+      .credit {
+        position: fixed;
+        bottom: 16px;
+        right: 16px;
+        font-size: 12px;
+        color: #7c7c7c;
+      }
     </style>
   </head>
   <body>
@@ -113,10 +126,12 @@
         <circle cx="20" cy="26.5" r="1.75" fill="#737373" />
       </svg>
       <div class="text">
-        <h1>Are you lost?</h1>
-        <p>This address does not point to a site on Frappe Cloud.</p>
+        <h1>Ce site n'existe pas… ou plus.</h1>
+        <p>Cette adresse ne correspond à aucun site hébergé sur Dokos Cloud.</p>
+        <p class="en" lang="en">Are you lost? This address does not point to a site on Dokos Cloud.</p>
       </div>
-      <a class="button" href="https://frappecloud.com">Go to Frappe Cloud</a>
+      <a class="button" href="https://cloud.dokos.io">Aller sur Dokos Cloud</a>
     </div>
+    <p class="credit">Hébergé par Dokos SAS. Propulsé par le logiciel Frappe Press.</p>
   </body>
 </html>
