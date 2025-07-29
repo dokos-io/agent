@@ -257,7 +257,7 @@ class TestProxy(unittest.TestCase):
         with open(redirect_file) as r:
             self.assertDictEqual(json.load(r), original_dict)
 
-    def _render_proxy_config(self):
+    def _render_proxy_config(self, **extra_config):
         """Generate proxy.conf for one site upstream and return its contents."""
         proxy = self._get_fake_proxy()
         proxy.upstreams_directory = self.upstreams_directory
@@ -269,7 +269,7 @@ class TestProxy(unittest.TestCase):
         with open(os.path.join(upstream_directory, "site.frappe.cloud"), "w") as f:
             f.write("active")
 
-        config = {"domain": self.tld, "nginx_directory": proxy.nginx_directory}
+        config = {"domain": self.tld, "nginx_directory": proxy.nginx_directory, **extra_config}
         with patch.object(Proxy, "get_config", return_value=config):
             proxy._generate_proxy_config()
 
@@ -291,6 +291,35 @@ class TestProxy(unittest.TestCase):
 
         dhparam_file = os.path.join(self.test_dir, "ffdhe2048.pem")
         self.assertIn(f"ssl_dhparam {dhparam_file};", rendered)
+
+    # @dokos
+    def test_generated_proxy_config_has_custom_directives_and_dhparam(self):
+        """Test custom_proxy_directives land in the site server block, next to ssl_dhparam."""
+        directives = ["client_max_body_size 500m;", 'add_header X-Dokos "1";']
+        rendered = self._render_proxy_config(custom_proxy_directives=directives)
+
+        dhparam_file = os.path.join(self.test_dir, "ffdhe2048.pem")
+        self.assertIn(f"ssl_dhparam {dhparam_file};", rendered)
+        site_block = rendered[rendered.index("listen 443") :]
+        for directive in directives:
+            self.assertIn(f"\t{directive}\n", site_block)
+
+    # @dokos
+    def test_generated_proxy_config_without_custom_directives(self):
+        rendered = self._render_proxy_config()
+        self.assertNotIn("client_max_body_size 500m;", rendered)
+
+    # @dokos
+    def test_generated_proxy_config_listens_on_ipv6(self):
+        """Test every IPv4 listen line has its IPv6 twin."""
+        rendered = self._render_proxy_config()
+        listen_lines = [line.strip() for line in rendered.splitlines() if line.strip().startswith("listen ")]
+        ipv4 = [line for line in listen_lines if "[::" not in line]
+        ipv6 = [line for line in listen_lines if "[::" in line]
+        self.assertTrue(ipv4)
+        self.assertEqual(len(ipv4), len(ipv6), listen_lines)
+        self.assertIn("listen [::]:443 http2 ssl", rendered)
+        self.assertIn("listen [::]:80;", rendered)
 
     def test_shipped_dhparam_file_is_the_ffdhe2048_group(self):
         """Test agent ships Mozilla's ffdhe2048 group, the one ssl_dhparam points to."""

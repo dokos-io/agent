@@ -352,6 +352,7 @@ class Proxy(Server):
                 "error_pages_directory": self.error_pages_directory,
                 "tls_protocols": config.get("tls_protocols"),
                 "dhparam_file": self.dhparam_file,
+                "custom_directives": self.config.get("custom_proxy_directives", []),  # @dokos
             }
 
         self._render_template(
