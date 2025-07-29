@@ -314,6 +314,7 @@ class Proxy(Server):
                 "nginx_directory": config["nginx_directory"],
                 "error_pages_directory": self.error_pages_directory,
                 "tls_protocols": config.get("tls_protocols"),
+                "custom_directives": self.config.get("custom_proxy_directives", []),
             }
 
         self._render_template(

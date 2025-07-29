@@ -114,6 +114,10 @@ server {
 	more_set_headers "Referrer-Policy: no-referrer-when-downgrade";
 	more_set_headers "Strict-Transport-Security: max-age=31536000; includeSubDomains; preload";
 
+	{% for directive in custom_directives %}
+	{{ directive }}
+	{% endfor %}
+
 	{% if host_options.redirect %}
 
 	location / {
