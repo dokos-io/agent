@@ -110,9 +110,9 @@ server {
 		{% endif %}
 	}
 
-	location ~ ^/protected/(.*) {
+	location /protected/ {
 		internal;
-		try_files /$site_name_{{ bench_name_slug }}/$1 =404;
+		alias {{ sites_directory }}/$site_name_{{ bench_name_slug }}/;
 	}
 
 	location /socket.io {
@@ -283,9 +283,9 @@ server {
 		{% endif %}
 	}
 
-	location ~ ^/protected/(.*) {
+	location /protected/ {
 		internal;
-		try_files /$site_name_{{ bench_name_slug }}/$1 =404;
+		alias {{ sites_directory }}/$site_name_{{ bench_name_slug }}/;
 	}
 
 	location /socket.io {
