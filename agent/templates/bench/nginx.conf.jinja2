@@ -61,9 +61,9 @@ server {
 		add_header Cache-Control "max-age=31536000, immutable";
 	}
 
-	location ~ ^/protected/(.*) {
+	location /protected/ {
 		internal;
-		try_files /$site_name_{{ bench_name_slug }}/$1 =404;
+		alias {{ sites_directory }}/$site_name_{{ bench_name_slug }}/;
 	}
 
 	location /socket.io {
@@ -196,9 +196,9 @@ server {
 		add_header Cache-Control "max-age=31536000, immutable";
 	}
 
-	location ~ ^/protected/(.*) {
+	location /protected/ {
 		internal;
-		try_files /$site_name_{{ bench_name_slug }}/$1 =404;
+		alias {{ sites_directory }}/$site_name_{{ bench_name_slug }}/;
 	}
 
 	location /socket.io {
