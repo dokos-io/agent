@@ -26,7 +26,7 @@ from agent.base import AgentException, Base
 from agent.exceptions import InvalidSiteConfigException, SiteNotExistsException
 from agent.job import job, step
 from agent.site import Site
-from agent.utils import download_file, end_execution, get_execution_result, get_size
+from agent.utils import db_client_cli, download_file, end_execution, get_execution_result, get_size
 
 if TYPE_CHECKING:
     from agent.server import Server
@@ -281,7 +281,10 @@ class Bench(Base):
             "FLUSH PRIVILEGES",
         ]
         for query in queries:
-            command = f'mysql -h {self.host} -P {self.db_port} -uroot -p{mariadb_root_password} -e "{query}"'
+            command = (
+                f"{db_client_cli()} -h {self.host} -P {self.db_port} "
+                f'-uroot -p{mariadb_root_password} -e "{query}"'
+            )
             self.execute(command)
         return database, user, password
 
@@ -294,7 +297,10 @@ class Bench(Base):
             "FLUSH PRIVILEGES",
         ]
         for query in queries:
-            command = f'mysql -h {self.host} -P {self.db_port} -uroot -p{mariadb_root_password} -e "{query}"'
+            command = (
+                f"{db_client_cli()} -h {self.host} -P {self.db_port} "
+                f'-uroot -p{mariadb_root_password} -e "{query}"'
+            )
             self.execute(command)
 
     def fetch_monitor_data(self):
