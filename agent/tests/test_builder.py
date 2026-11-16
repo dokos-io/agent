@@ -44,6 +44,38 @@ class TestCheckVersion(unittest.TestCase):
                 self.assertEqual(ValidationManager.check_version(actual, expected), want)
 
 
+# @dokos
+class TestDodockVersionOffset(unittest.TestCase):
+    """Dodock and Dokos ERPNext report a major 11 below the Frappe/ERPNext version apps declare."""
+
+    def check(self, dep_app, actual, expected):
+        from agent.builder import ValidationManager
+
+        manager = ValidationManager.__new__(ValidationManager)
+        with patch.object(ValidationManager, "_get_app_version", return_value=actual):
+            manager._check_frappe_dependencies("hrms", {dep_app: expected})
+
+    def test_dodock_matches_the_frappe_range(self):
+        self.check("frappe", "6.0.0-dev", ">=17.0.0-dev,<18")
+        self.check("frappe", "6.2.1", ">=17.0.0-dev,<18")
+
+    def test_dokos_erpnext_matches_the_erpnext_range(self):
+        self.check("erpnext", "6.0.0-dev", ">=17.0.0-dev,<18.0.0")
+
+    def test_plain_frappe_versions_still_match(self):
+        self.check("frappe", "17.0.0-dev", ">=17.0.0-dev,<18")
+
+    def test_offset_does_not_hide_a_wrong_major(self):
+        with self.assertRaises(Exception) as ctx:
+            self.check("frappe", "5.0.0", ">=17.0.0-dev,<18")
+        self.assertEqual(ctx.exception.args[0], "Incompatible app version found")
+
+    def test_payments_gets_no_offset(self):
+        with self.assertRaises(Exception) as ctx:
+            self.check("payments", "6.0.0-dev", ">=17.0.0-dev,<18")
+        self.assertEqual(ctx.exception.args[0], "Incompatible app version found")
+
+
 class TestBuildContext(unittest.TestCase):
     def test_build_context_includes_the_asset_store_script(self):
         from agent.builder import ContextManager

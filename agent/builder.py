@@ -470,6 +470,11 @@ class ValidationManager(Base, JobMixin):
             if not actual or sv.Version(actual) in sv.SimpleSpec(expected):
                 continue
 
+            # @dokos: Dodock and Dokos ERPNext majors are 11 below upstream (Dodock 6 = Frappe 17)
+            frappe_version = dodock_to_frappe_version(actual)
+            if dep_app in ["frappe", "erpnext"] and frappe_version in sv.SimpleSpec(expected):
+                continue
+
             # Do not change args without updating deploy_notifications.py
             raise Exception(
                 "Incompatible app version found",
@@ -535,6 +540,23 @@ class ValidationManager(Base, JobMixin):
                     stacklevel=2,
                     source={"app": app},
                 )
+
+
+# @dokos
+DODOCK_MAJOR_VERSION_OFFSET = 11
+
+
+# @dokos
+def dodock_to_frappe_version(version: str) -> sv.Version:
+    """Return the upstream Frappe/ERPNext version that matches a Dodock/Dokos ERPNext version."""
+    v = sv.Version(version)
+    return sv.Version(
+        major=v.major + DODOCK_MAJOR_VERSION_OFFSET,
+        minor=v.minor,
+        patch=v.patch,
+        prerelease=v.prerelease,
+        build=v.build,
+    )
 
 
 class ImageBuilder(Base, JobMixin):
