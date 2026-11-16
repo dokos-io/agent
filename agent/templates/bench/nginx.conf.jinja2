@@ -185,6 +185,7 @@ server {
 		# one static page is shared by every bench on the server, so the link to this
 		# bench's web.error.log can only be completed here
 		sub_filter '__BENCH_NAME__' '{{ bench_name }}';
+		sub_filter_once off;
 	}
 
 	proxy_intercept_errors on;
@@ -360,6 +361,7 @@ server {
 		# one static page is shared by every bench on the server, so the link to this
 		# bench's web.error.log can only be completed here
 		sub_filter '__BENCH_NAME__' '{{ bench_name }}';
+		sub_filter_once off;
 	}
 
 	# optimizations
