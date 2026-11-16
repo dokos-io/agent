@@ -288,3 +288,38 @@ packages = ["libmagic1", " ffmpeg "]
             packages = ContextManager._parse_additional_packages(context)
 
         self.assertEqual(packages, ["libmagic1", "ffmpeg", "poppler-utils"])
+
+
+# @dokos
+class TestFlowServerDetection(unittest.TestCase):
+    def detect(self, python_version, lifecycle_source):
+        from pathlib import Path
+
+        from agent.builder import ContextManager
+
+        with tempfile.TemporaryDirectory() as build_directory:
+            if lifecycle_source is not None:
+                daemon = Path(build_directory, "apps", "frappe", "frappe", "flow", "daemon")
+                daemon.mkdir(parents=True)
+                (daemon / "lifecycle.py").write_text(lifecycle_source)
+            dependencies = {"PYTHON_VERSION": python_version} if python_version else {}
+            context = SimpleNamespace(
+                build_directory=build_directory,
+                deploy_candidate_params={"dependencies": dependencies},
+            )
+            return ContextManager.supports_flow_server(context)
+
+    def test_flow_with_serve_on_python_3_14(self):
+        self.assertTrue(self.detect("3.14", "def serve() -> None:\n    pass\n"))
+
+    def test_python_below_3_14(self):
+        self.assertFalse(self.detect("3.13", "def serve() -> None:\n    pass\n"))
+
+    def test_frappe_without_flow(self):
+        self.assertFalse(self.detect("3.14", None))
+
+    def test_flow_without_supervisor_entry_point(self):
+        self.assertFalse(self.detect("3.14", "def start() -> None:\n    pass\n"))
+
+    def test_missing_python_version(self):
+        self.assertFalse(self.detect(None, "def serve() -> None:\n    pass\n"))

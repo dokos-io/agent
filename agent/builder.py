@@ -148,6 +148,21 @@ class ContextManager(Base, JobMixin):
 
         return output
 
+    # @dokos
+    def supports_flow_server(self) -> bool:
+        """True when the cloned frappe can run Frappe Flow's agent server under supervisor.
+
+        Press reads it from the build job data and then sets `flow_server_manager:
+        supervisor` on the bench. The `flow` binary needs Python 3.14 or later.
+        """
+        python_version = (self.deploy_candidate_params.get("dependencies") or {}).get("PYTHON_VERSION")
+        if not python_version or sv.Version.coerce(python_version) < sv.Version("3.14.0"):
+            return False
+
+        lifecycle = Path(self.build_directory, "apps", "frappe", "frappe", "flow", "daemon", "lifecycle.py")
+        # `serve()` is the supervisor entry point; the first Flow commits had none.
+        return lifecycle.is_file() and "def serve(" in lifecycle.read_text(errors="replace")
+
     def _copy_build_config_files(self):
         """Copy generic build config files to the build context"""
         for filename in ["common_site_config.json", "supervisord.conf", ".vimrc", "get_cached_app.py", "run_hooks.py"]:
@@ -333,6 +348,7 @@ class ContextManager(Base, JobMixin):
 
             shutil.copytree(source_path, dest_path, symlinks=True)
 
+        self.deploy_candidate_params["supports_flow_server"] = self.supports_flow_server()  # @dokos
         self._copy_build_config_files()
         self._generate_build_config_files()
         self._add_stored_assets()
@@ -640,6 +656,10 @@ class ImageBuilder(Base, JobMixin):
         try:
             self.context_manager.clone_repositories()
             self.context_manager.prepare_build_context()
+            # @dokos: Press reads it from the job data to set up the bench's Flow server
+            self.data.update(
+                {"supports_flow_server": self.context_manager.deploy_candidate_params["supports_flow_server"]}
+            )
             self.validation_manager.validate(
                 apps=[app_info["app"] for app_info in self.context_manager.clone_instructions],
                 build_directory=self.build_directory,
