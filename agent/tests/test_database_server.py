@@ -239,3 +239,49 @@ class TestPurgeBinlog(unittest.TestCase):
         self.assertIn("2 binlogs before mysql-bin.000043 are still on disk", output)
         self.assertIn("from mysql-bin.000041 to mysql-bin.000042", output)
         self.assertIn(f"MariaDB: {self.NOTE}", output)
+
+
+# @dokos
+class TestSearchBinaryLogInput(unittest.TestCase):
+    def setUp(self):
+        self.directory = TemporaryDirectory()
+        self.server = DatabaseServer.__new__(DatabaseServer)
+        self.server.mariadb_directory = self.directory.name
+
+    def tearDown(self):
+        self.directory.cleanup()
+
+    def search(self, log, database="_abc123"):
+        with patch.object(DatabaseServer, "execute", return_value={"output": ""}) as execute:
+            self.server.search_binary_log(
+                log, database, "2026-01-01 00:00:00", "2026-01-02 00:00:00", ".*", 10
+            )
+        return execute
+
+    def test_accepts_a_binary_log_name(self):
+        execute = self.search("mysql-bin.000042")
+        command = execute.call_args[0][0]
+        self.assertIn(os.path.join(os.path.realpath(self.directory.name), "mysql-bin.000042"), command)
+
+    def test_rejects_paths_outside_the_mariadb_directory(self):
+        for log in (
+            "..",
+            "../x",
+            "../mysql-bin.000001",
+            "/etc/passwd",
+            "mysql-bin.1/../../x",
+            "mysql-bin.1;id",
+        ):
+            with self.subTest(log=log), self.assertRaises(ValueError):
+                self.search(log)
+
+    def test_rejects_a_symlink_that_leaves_the_directory(self):
+        with TemporaryDirectory() as outside:
+            os.symlink(outside, os.path.join(self.directory.name, "mysql-bin.000007"))
+            with self.assertRaises(ValueError):
+                self.search("mysql-bin.000007")
+
+    def test_rejects_a_database_name_with_shell_characters(self):
+        for database in ("db; rm -rf /", "db'", "a b", "", "../db"):
+            with self.subTest(database=database), self.assertRaises(ValueError):
+                self.search("mysql-bin.000001", database)

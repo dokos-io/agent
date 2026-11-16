@@ -5,6 +5,7 @@ import fcntl
 import json
 import os
 import re
+import shlex
 import subprocess
 from datetime import datetime, timezone
 from pathlib import Path
@@ -387,6 +388,59 @@ WHERE `schema` IN (
             port=self.db_port,
         )
         mariadb.execute_sql("FLUSH TABLES;")
+
+    # @dokos: used by the Press Binary Log Browser report, removed upstream in e1fa66a
+    def search_binary_log(
+        self,
+        log,
+        database,
+        start_datetime,
+        stop_datetime,
+        search_pattern,
+        max_lines,
+    ):
+        log = self._binary_log_path(log)
+        if not re.fullmatch(r"[A-Za-z0-9_]+", database):
+            raise ValueError(f"{database!r} is not a database name")
+        LINES_TO_SKIP = r"^(USE|COMMIT|START TRANSACTION|DELIMITER|ROLLBACK|#)"
+        command = (
+            f"mysqlbinlog --short-form --database {shlex.quote(database)} "
+            f"--start-datetime {shlex.quote(str(start_datetime))} "
+            f"--stop-datetime {shlex.quote(str(stop_datetime))} "
+            f" {shlex.quote(log)} | grep -Piv '{LINES_TO_SKIP}'"
+        )
+
+        DELIMITER = "/*!*/;"
+
+        events = []
+        timestamp = 0
+        for line in self.execute(command, skip_output_log=True)["output"].split(DELIMITER):
+            line = line.strip()
+            if line.startswith("SET TIMESTAMP"):
+                timestamp = int(line.split("=")[-1].split(".")[0])
+            else:
+                if any(line.startswith(skip) for skip in ["SET", "/*!"]):
+                    continue
+                if line and timestamp and re.search(search_pattern, line):
+                    events.append(
+                        {
+                            "query": line,
+                            "timestamp": str(datetime.utcfromtimestamp(timestamp)),
+                        }
+                    )
+                    if len(events) > max_lines:
+                        break
+        return events
+
+    # @dokos: the log name comes from the request, keep it inside the MariaDB directory
+    def _binary_log_path(self, log: str) -> str:
+        if not re.fullmatch(r"mysql-bin\.\d+", log):
+            raise ValueError(f"{log!r} is not a binary log name")
+        directory = os.path.realpath(self.mariadb_directory)
+        path = os.path.realpath(os.path.join(directory, log))
+        if os.path.dirname(path) != directory:
+            raise ValueError(f"{log!r} is outside the MariaDB directory")
+        return path
 
     @property
     def binary_logs(self):
